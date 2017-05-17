@@ -2,12 +2,11 @@
 
 from setuptools import setup, find_packages
 
-setup(name='txThings',
-      version='0.2.0',
-      description='CoAP protocol implementation for Twisted Framework',
-      author='Maciej Wasilak',
-      author_email='wasilak@gmail.com',
-      url='https://github.com/siskin/txThings/',
+setup(name='piccata',
+      version='1.0.0',
+      description='Python CoAP Toolkit',
+      author='Nordic Semiconductor',
+      url='https://github.com/NordicSemiconductor/piccata',
       packages=find_packages(exclude=["*.test", "*.test.*"]),
       install_requires = ['ipaddress'],
      )
