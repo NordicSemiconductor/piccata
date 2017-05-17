@@ -1,0 +1,25 @@
+# TODO Add some copyright notice.
+
+from transport.base import TransportBase
+from ipaddress import ip_address
+
+class TesterTransport(TransportBase):
+
+    def __init__(self, port=None):
+        TransportBase.__init__(self, port)
+
+        self.tester_opened = False
+        self.tester_data = None
+        self.tester_remote = None
+        self.output_count = 0
+
+    def open(self):
+        self.tester_opened = True
+
+    def close(self):
+        self.tester_opened = False
+
+    def send(self, data, dest):
+        self.tester_data = data
+        self.tester_remote = dest
+        self.output_count += 1
