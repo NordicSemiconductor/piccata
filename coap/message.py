@@ -3,10 +3,11 @@ Copyright (c) 2012 Maciej Wasilak <http://sixpinetrees.blogspot.com/>
               2017 Robert Lubos
 '''
 import struct
-
-from constants import *
 import option
+import os
 
+from coap.constants import EMPTY, MAX_TRANSMIT_WAIT, ACK, RST, MAX_TOKEN_LENGTH
+    
 class Message(object):
     """A CoAP Message."""
 
@@ -62,15 +63,15 @@ class Message(object):
 
     def is_successfull(self):
         return (self.code >= 64 and self.code < 96)
-
+    
     @classmethod
-    def _empty_message(cls, request, type):
-        response = cls(mtype=type, mid=request.mid, code=EMPTY, payload='', token='')
+    def _empty_message(cls, request, mtype):
+        response = cls(mtype=mtype, mid=request.mid, code=EMPTY, payload='', token='')
         response.remote = request.remote
         return response
 
     @classmethod
-    def AckMessage(cls, request, code, payload):
+    def AckMessage(cls, request, code, payload = ''):
         ack = cls(mtype=ACK, mid=request.mid, code=code, payload=payload, token=request.token)
         ack.remote = request.remote
         return ack
@@ -82,3 +83,15 @@ class Message(object):
     @classmethod
     def EmptyRstMessage(cls, request):
         return cls._empty_message(request, RST)
+
+def random_token(length = MAX_TOKEN_LENGTH):
+    """Generate a new random token.
+
+    Args:
+        length (int): A length of a token. Shall not be greater than MAX_TOKEN_LENGTH.
+
+    Returns:
+        A random token byte string of specified length.
+    """
+    assert length <= MAX_TOKEN_LENGTH
+    return os.urandom(length)
