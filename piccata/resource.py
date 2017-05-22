@@ -1,6 +1,6 @@
 """
 Copyright (c) 2012 Maciej Wasilak <http://sixpinetrees.blogspot.com/>
-              2017 Robert Lubos
+              2017 Nordic Semiconductor ASA
 
 Implementation of the lowest-level Resource class.
 """
@@ -9,8 +9,6 @@ import message
 from constants import *
 from itertools import chain
 from types import NoResource, UnallowedMethod, UnsupportedMethod
-
-# TODO This code might need some polishing if it's going to be used.
 
 class CoapResource(object):
     """CoAP-accessible resource."""
@@ -27,100 +25,28 @@ class CoapResource(object):
 
     observable = False
     observe_index = 0
-    isLeaf = 0
+    is_leaf = False
 
-    ### Abstract Collection Interface
+    def get_child(self, path):
+        """Retrieve a child resource from me.
 
-    def listStaticNames(self):
-        return self.children.keys()
-
-    def listStaticEntities(self):
-        return self.children.items()
-
-    def listNames(self):
-        return self.listStaticNames() + self.listDynamicNames()
-
-    def listEntities(self):
-        return self.listStaticEntities() + self.listDynamicEntities()
-
-    def listDynamicNames(self):
-        return []
-
-    def listDynamicEntities(self, request=None):
-        return []
-
-    def getStaticEntity(self, name):
-        return self.children.get(name)
-
-    def getDynamicEntity(self, name, request):
-        if name not in self.children:
-            return self.getChild(name, request)
-        else:
-            return None
-
-    def delEntity(self, name):
-        del self.children[name]
-
-    def reallyPutEntity(self, name, entity):
-        self.children[name] = entity
-
-    # Concrete HTTP interface
-
-    def getChild(self, path, request):
-        """
-        Retrieve a 'child' resource from me.
-
-        Implement this to create dynamic resource generation -- resources which
-        are always available may be registered with self.putChild().
-
-        This will not be called if the class-level variable 'isLeaf' is set in
-        your subclass; instead, the 'postpath' attribute of the request will be
-        left as a list of the remaining path elements.
-
-        For example, the URL /foo/bar/baz will normally be::
-
-          | site.resource.getChild('foo').getChild('bar').getChild('baz').
-
-        However, if the resource returned by 'bar' has isLeaf set to true, then
-        the getChild call will never be made on it.
-
-        @param path: a string, describing the child
-
-        @param request: a twisted.web.server.Request specifying meta-information
-                        about the request that is being made for this child.
-        """
-        raise NoResource
-
-    def getChildWithDefault(self, path, request):
-        """
-        Retrieve a static or dynamically generated child resource from me.
-
-        First checks if a resource was added manually by putChild, and then
-        call getChild to check for dynamic resources. Only override if you want
-        to affect behaviour of all child lookups, rather than just dynamic
-        ones.
-
-        This will check to see if I have a pre-registered child resource of the
-        given name, and call getChild if I do not.
+        If no resource is found, NoResource exception is raised.
         """
         if path in self.children:
             return self.children[path]
-        return self.getChild(path, request)
+        raise NoResource
 
-    def putChild(self, path, child):
-        """
-        Register a static child.
+    def put_child(self, path, child):
+        """Register a static child.
 
-        You almost certainly don't want '/' in your path. If you
-        intended to have the root of a folder, e.g. /foo/, you want
-        path to be ''.
+        You almost certainly don't want '/' in your path. If you intended to have the root of a folder,
+        e.g. /foo/, you want path to be ''.
         """
         self.children[path] = child
         child.server = self.server
 
     def render(self, request):
-        """
-        Render a given resource. Calls a handler for respective request code in format render_CODE.
+        """Render a given resource. Calls a handler for respective request code in format render_CODE.
 
         The render method shall accept one argument with a request message. An example render method:
             rended_GET(request)
@@ -135,14 +61,14 @@ class CoapResource(object):
             raise UnallowedMethod()
         return m(request)
 
-    def addParam(self, param):
+    def add_param(self, param):
         self.params.setdefault(param.name, []).append(param)
 
-    def deleteParam(self, name):
+    def delete_param(self, name):
         if name in self.params:
             self.params.pop(name)
 
-    def getParam(self, name):
+    def get_param(self, name):
         return self.params.get(name)
 
     def encode_params(self):
@@ -152,7 +78,7 @@ class CoapResource(object):
             data.append(param.encode())
         return (';'.join(data))
 
-    def generateResourceList(self, data, path=""):
+    def generate_resource_list(self, data, path=""):
         params = self.encode_params() + (";obs" if self.observable else "")
         if self.visible is True:
             if path is "":
@@ -160,7 +86,7 @@ class CoapResource(object):
             else:
                 data.append('<' + path + '>' + params)
         for key in self.children:
-            self.children[key].generateResourceList(data, path + "/" + key)
+            self.children[key].generate_resource_list(data, path + "/" + key)
 
 
 class LinkParam(object):
@@ -188,8 +114,8 @@ class CoapEndpoint(object):
     def get_resource_for(self, request):
         """Get a resource for a request.
 
-        This iterates through the resource heirarchy, calling getChildWithDefault on each resource
-        it finds for a path element, stopping when it hits an element where isLeaf is true.
+        This iterates through the resource hierarchy, calling get_child on each resource
+        it finds for a path element, stopping when it hits an element where is_leaf is true.
 
         Args:
             request (coap.message.Message) A request containing the Uri path to search for.
@@ -197,13 +123,13 @@ class CoapEndpoint(object):
         resource = self.root
         postpath = request.opt.uri_path
 
-        while postpath and not resource.isLeaf:
+        while postpath and not resource.is_leaf:
             pathElement = postpath.pop(0)
-            resource = resource.getChildWithDefault(pathElement, request)
+            resource = resource.get_child(pathElement)
         return resource
 
 
-class ResoureManager(object):
+class ResourceManager(object):
 
     def __init__(self, endpoint):
         """Initialize the resource manager.
@@ -237,4 +163,3 @@ class ResoureManager(object):
             response = message.Message.AckMessage(request, code=METHOD_NOT_ALLOWED, payload="Error: Method not recognized!")
 
         return response
-

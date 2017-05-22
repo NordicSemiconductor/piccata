@@ -1,9 +1,9 @@
-'''
+"""
 Copyright (c) 2012 Maciej Wasilak <http://sixpinetrees.blogspot.com/>
-              2017 Robert Lubos
+              2017 Nordic Semiconductor ASA
 
 Exception definitions and types for CoAP toolkit.
-'''
+"""
 
 import collections
 
@@ -77,8 +77,8 @@ __all__ = ['Error',
            'UnallowedMethod',
            'UnsupportedMethod',
            'NotImplemented',
-           'WaitingForClientTimedOut'
            'RequestTimedOut',
+           'WaitingForClientTimedOut'
            'ResourceChanged',
            'MissingBlock2Option',
            'Endpoint']

@@ -1,4 +1,8 @@
-# TODO Add some copyright notice.
+"""
+Copyright (c) 2017 Nordic Semiconductor ASA
+
+An abstract base class for specific transport classes.
+"""
 
 from abc import ABCMeta, abstractmethod
 

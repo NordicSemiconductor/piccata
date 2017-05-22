@@ -1,4 +1,11 @@
-import coap
+"""
+Copyright (c) 2012 Maciej Wasilak <http://sixpinetrees.blogspot.com/>
+              2017 Nordic Semiconductor ASA
+
+CoAP block transfer helper functions.
+"""
+
+import piccata
 
 from constants import *
 from message import Message

@@ -1,5 +1,8 @@
-# TODO Add some copyright notice.
+"""
+Copyright (c) 2017 Nordic Semiconductor ASA
 
+CoAP transport class for tests.
+"""
 from transport.base import TransportBase
 from ipaddress import ip_address
 

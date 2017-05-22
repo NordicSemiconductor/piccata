@@ -58,7 +58,6 @@ class TestTransport(unittest.TestCase):
         self.assertEqual(len(self.transport._receivers), len(self.receivers) - 1)
         for rec in self.transport._receivers:
             self.assertNotEqual(rec, self.receivers["receiver_2"])
-            # TODO perhaps names could be removed overall
             self.assertNotEqual(rec.name, "receiver_2")
 
     def test_tranport_shall_call_receive_callbacks_when_receive_is_called(self):
@@ -117,9 +116,6 @@ class TestSocketTransport(unittest.TestCase):
 
         self.assertEqual(self.receivers["client"].counter, 1)
         self.assertEqual(self.receivers["client"].data, test_response)
-
-
-# TODO Test ncp transport when ready. And possibly extend socket tests.
 
 if __name__ == "__main__":
     unittest.main()

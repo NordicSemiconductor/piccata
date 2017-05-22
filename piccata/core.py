@@ -1,6 +1,8 @@
 """
 Copyright (c) 2012 Maciej Wasilak <http://sixpinetrees.blogspot.com/>
-              2017 Robert Lubos
+              2017 Nordic Semiconductor ASA
+
+CoAP protocol implementation.
 """
 import random
 import logging
