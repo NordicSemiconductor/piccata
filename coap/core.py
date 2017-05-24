@@ -418,9 +418,7 @@ class _CoapTransactionLayer(object):
             raise ValueError("Message type not specified")
 
         assert response_callback == None or callable(response_callback)
-
-        if request.token is None:
-            request.token = Coap.random_token()
+        assert request.token is not None
 
         try:
             self._message_layer.send_message(request)
@@ -568,16 +566,3 @@ class Coap:
         request.remote = Endpoint(ip_address(request.remote[0]), request.remote[1])
         response.remote = Endpoint(ip_address(response.remote[0]), response.remote[1])
         self._transaction_layer.send_response(request, response)
-
-    @staticmethod
-    def random_token(len=MAX_TOKEN_LENGTH):
-        """Generate a new random token.
-
-        Args:
-            len (int): A length of a token. Shall not be greater than MAX_TOKEN_LENGTH.
-
-        Returns:
-            A random token byte string of specified length.
-        """
-        assert len <= MAX_TOKEN_LENGTH
-        return os.urandom(len)

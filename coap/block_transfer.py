@@ -46,7 +46,7 @@ def create_block_1_request(data, number, uri_path, mtype=CON, code=PUT, size_exp
     if code not in (PUT, POST):
         raise ValueError("Block 1 request should be PUT or POST")
 
-    request = Message(mtype=mtype, code=code, payload=data_block, token=coap.core.Coap.random_token())
+    request = Message(mtype=mtype, code=code, payload=data_block, token=coap.message.random_token())
     request.opt.uri_path = uri_path
     request.opt.block1 = (number, more, size_exp)
     return request
@@ -76,7 +76,7 @@ def create_block_2_request(number, uri_path, mtype=CON, size_exp=DEFAULT_BLOCK_S
     if type not in (CON, NON):
         raise ValueError("Block 2 request should be of type CON or NON")
 
-    request = Message(mtype=mtype, code=GET, token=coap.core.Coap.random_token())
+    request = Message(mtype=mtype, code=GET, token=coap.message.random_token())
     request.opt.uri_path = uri_path
     request.opt.block2 = (number, False, size_exp)
     return request
