@@ -1,5 +1,8 @@
-# TODO Add some copyright notice.
+"""
+Copyright (c) 2017 Nordic Semiconductor ASA
 
+CoAP transport implmentation based on sockets.
+"""
 import socket
 import time
 import errno
@@ -41,7 +44,6 @@ class ListenerThread(Thread):
                     print("shutdown!")
                     break
                 else:
-                    # TODO I don't like the own address solution.
                     own_addr = self._sock.getsockname()
                     own_addr = (ip_address(unicode(own_addr[0])), own_addr[1])
                     self._receive_callback(data, addr, own_addr)

@@ -1,6 +1,8 @@
 """
 Copyright (c) 2012 Maciej Wasilak <http://sixpinetrees.blogspot.com/>
-              2017 Robert Lubos
+              2017 Nordic Semiconductor ASA
+
+CoAP protocol implementation.
 """
 import random
 import logging
@@ -42,7 +44,7 @@ class _CoapMessageLayer(object):
         as message received within last EXCHANGE_LIFETIME seconds (usually 247 seconds).
 
         Args:
-            message (coap.message.Message): A message to check.
+            message (piccata.message.Message): A message to check.
 
         Returns:
             bool: The return value. True if duplicate was detected, False otherwise.
@@ -109,7 +111,7 @@ class _CoapMessageLayer(object):
         ACK or RST message with the same Message ID is received from target host.
 
         Args:
-            message (coap.message.Message): A message to retransmit.
+            message (piccata.message.Message): A message to retransmit.
         """
         timeout = random.uniform(ACK_TIMEOUT, ACK_TIMEOUT * ACK_RANDOM_FACTOR)
         retransmission_counter = 0
@@ -123,7 +125,7 @@ class _CoapMessageLayer(object):
            mid (int): An ID of a message to remove.
 
         Returns:
-            coap.message.Message: A message removed from the retransmission list. None if no message was found.
+            piccata.message.Message: A message removed from the retransmission list. None if no message was found.
         """
         msg, timer = self._active_exchanges.pop(mid, (None, None))
         if timer != None:
@@ -157,7 +159,7 @@ class _CoapMessageLayer(object):
         """Bind a CoAP Transaction layer with a CoAP Message layer.
 
         Args:
-            transaction_layer (coap.core._CoapTransactionLayer): A transaction layer for handling messages.
+            transaction_layer (piccata.core._CoapTransactionLayer): A transaction layer for handling messages.
         """
         self._transaction_layer = transaction_layer
 
@@ -168,8 +170,8 @@ class _CoapMessageLayer(object):
 
         Args:
             data (bytes): Data received.
-            remote (coap.types.Endpoint): An address of the message originator.
-            local (coap.types.Endpoint): A destination address that data was received to.
+            remote (piccata.types.Endpoint): An address of the message originator.
+            local (piccata.types.Endpoint): A destination address that data was received to.
         """
         logging.info("Received %r from %s:%d" % (data, remote[0], remote[1]))
         message = Message.decode(data, remote)
@@ -188,7 +190,7 @@ class _CoapMessageLayer(object):
         """Set Message ID, encode and send message. Also if message is Confirmable (CON) add exchange.
 
         Args:
-            message (coap.message.Message): A message to send.
+            message (piccata.message.Message): A message to send.
         """
         logging.info("Sending message to %s:%d" % message.remote)
 
@@ -230,7 +232,7 @@ class _CoapTransactionLayer(object):
         """Initialize CoAP Transaction layer object.
 
         Args:
-            message_layer (coap.core._CoapMessageLayer): A _CoapMessageLayer object that shall
+            message_layer (piccata.core._CoapMessageLayer): A _CoapMessageLayer object that shall
                                                         be bound to the transaction layer.
         """
         self._message_layer = message_layer
@@ -244,8 +246,8 @@ class _CoapTransactionLayer(object):
         Args:
             callback (function): A callback function registered by a user.
             result (int): A result code of the transaction.
-            request (coap.message.Message): A request that the callback was registered with.
-            response (coap.message.Message): A response received to the respective request.
+            request (piccata.message.Message): A request that the callback was registered with.
+            response (piccata.message.Message): A response received to the respective request.
         """
         cb, args, kw = callback
         args = args or ()
@@ -256,7 +258,7 @@ class _CoapTransactionLayer(object):
         """Add an active transaction and start a timeout timer.
 
         Args:
-            request (coap.message.Message): A request that is part of the transaction.
+            request (piccata.message.Message): A request that is part of the transaction.
             callback (function): A callback function registered by a user.
         """
         timer = Timer(request.timeout, self._timeout_transaction, (request, ))
@@ -269,9 +271,9 @@ class _CoapTransactionLayer(object):
 
         Args:
             token (bytes): A token related to transaction.
-            remote (coap.types.Endpoint): An endpoint address related to transaction.
+            remote (piccata.types.Endpoint): An endpoint address related to transaction.
             result (int): A result code of the transaction.
-            response (coap.message.Message): A response received to the respective request. May be None if no response was received.
+            response (piccata.message.Message): A response received to the respective request. May be None if no response was received.
         """
         try:
             request, callback, timer = self._outgoing_requests.pop((token, remote))
@@ -285,7 +287,7 @@ class _CoapTransactionLayer(object):
         """Clean the Request after a timeout.
 
         Args:
-            request (coap.message.Message): A request that has timed out.
+            request (piccata.message.Message): A request that has timed out.
         """
         logging.info("Request timed out")
         # In case of transaction layer timeout, remove a possible retransmission on message layer as well
@@ -296,7 +298,7 @@ class _CoapTransactionLayer(object):
         """Method used for processing incoming requests.
 
         Args:
-            request (coap.message.Message): A request to process.
+            request (piccata.message.Message): A request to process.
         """
         if request.mtype not in (CON, NON):
             return
@@ -314,7 +316,7 @@ class _CoapTransactionLayer(object):
         """Method used for processing incoming responses.
 
         Args:
-            response (coap.message.Message): A response to process.
+            response (piccata.message.Message): A response to process.
         """
 
         def _reset_unrecognized():
@@ -338,7 +340,7 @@ class _CoapTransactionLayer(object):
         """Method used for processing empty messages.
 
         Args:
-            message (coap.message.Message): An empty message to process.
+            message (piccata.message.Message): An empty message to process.
         """
         if message.mtype is CON:
             logging.info('Empty CON message received (CoAP Ping) - replying with RST.')
@@ -350,7 +352,7 @@ class _CoapTransactionLayer(object):
         """Clean the transaction after reset from message processing layer.
 
         Args:
-            request (coap.message.Message): A request to reset.
+            request (piccata.message.Message): A request to reset.
         """
         logging.info("Request reseted from the remote")
         self._finish_transaction(request.token, request.remote, RESULT_RESET, None)
@@ -359,7 +361,7 @@ class _CoapTransactionLayer(object):
         """Clean request after cancellation from user application.
 
         Args:
-            request (coap.message.Message): A request to cancel.
+            request (piccata.message.Message): A request to cancel.
         """
         logging.info("Request cancelled")
         # In case application cancels transaction, remove a possible retransmission on message layer as well
@@ -389,9 +391,9 @@ class _CoapTransactionLayer(object):
         """Process a received message. This function shall be called from the message layer.
 
         Args:
-            message (coap.message.Message): A received message.
-            remote (coap.types.Endpoint): A source address of the message.
-            local (coap.types.Endpoint): A destination address of the message.
+            message (piccata.message.Message): A received message.
+            remote (piccata.types.Endpoint): A source address of the message.
+            local (piccata.types.Endpoint): A destination address of the message.
         """
         if message.is_request():
             self._process_request(message)
@@ -406,7 +408,7 @@ class _CoapTransactionLayer(object):
         """Send a request.
 
         Args:
-            request (coap.message.Message): A request to send.
+            request (piccata.message.Message): A request to send.
             response_callback (function): A callback function that shall be called when response is received. May be None.
             response_callback_args (tuple): Optional arguments for the callback. May be None.
             response_callback_kw (dictionary): Optional keyword arguments for the callback. May be None.
@@ -434,8 +436,8 @@ class _CoapTransactionLayer(object):
         """Send a response.
 
         Args:
-            request (coap.message.Message): A request that the response is related to.
-            response (coap.message.Message): A response message.
+            request (piccata.message.Message): A request that the response is related to.
+            response (piccata.message.Message): A response message.
         """
         logging.info("Preparing response...")
 
@@ -480,8 +482,8 @@ class Coap:
 
         The object shall contain receive_request function of the following format:
             receive_request(request)
-        where request is an coap.message.Message object.
-        The function shall return a response message of type coap.message.Message, or None if no response shall be sent.
+        where request is an piccata.message.Message object.
+        The function shall return a response message of type piccata.message.Message, or None if no response shall be sent.
         This implementation does not automatically ACK confirmable requests. So if response is going to be prepared later,
         but the reuqest shall be acknowledged now, the function shall return an empty ACK message. The postponed response
         can be sent with the respond function later.
@@ -506,8 +508,8 @@ class Coap:
 
         Args:
             data (bytes): Data received.
-            remote (coap.types.Endpoint): An address of the message originator.
-            local (coap.types.Endpoint): A destination address that data was received to.
+            remote (piccata.types.Endpoint): An address of the message originator.
+            local (piccata.types.Endpoint): A destination address that data was received to.
         """
         self._message_layer.receive(data, remote, local)
 
@@ -520,8 +522,8 @@ class Coap:
             callback(result, request, response, *args, **kwargs)
         where:
             result (int): A code informing of a transaction result.
-            request (coap.message.Message): A request that the callback was registered with.
-            response (coap.message.Message): A response message. May be None if no response was received.
+            request (piccata.message.Message): A request that the callback was registered with.
+            response (piccata.message.Message): A response message. May be None if no response was received.
             args (tuple): Opional arguments. May be empty.
             kwargs (dictionary): Optional keyword arguments. May be empty.
 
@@ -532,7 +534,7 @@ class Coap:
             RESULT_CANCELLED = Request was cancelled by the application.
 
         Args:
-            request (coap.message.Message): A request to be sent.
+            request (piccata.message.Message): A request to be sent.
             response_callback (function): A callback funcition that will be called upon response reception. May be None.
             response_callback_args (tuple): An optional arguments for the callback function. May be None.
             response_callback_kw (dictionary): An optional keyword arguments for the callback function. May be None.
@@ -547,7 +549,7 @@ class Coap:
         If a callback was registered and transaction still exists, it will be called.
 
         Args:
-            request (coap.message.Message): A request to cancel.
+            request (piccata.message.Message): A request to cancel.
         """
         self._transaction_layer.cancel_transaction(request)
 
@@ -560,8 +562,8 @@ class Coap:
 
 
         Args:
-            request (coap.message.Message): A request that the response refers to.
-            response (coap.message.Message): A response message.
+            request (piccata.message.Message): A request that the response refers to.
+            response (piccata.message.Message): A response message.
         """
         request.remote = Endpoint(ip_address(request.remote[0]), request.remote[1])
         response.remote = Endpoint(ip_address(response.remote[0]), response.remote[1])

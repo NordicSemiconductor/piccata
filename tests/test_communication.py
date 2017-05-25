@@ -1,7 +1,7 @@
-from coap.constants import *
-from coap import core
-from coap import message
-from coap import resource
+from piccata.constants import *
+from piccata import core
+from piccata import message
+from piccata import resource
 from transport import tsocket
 
 from ipaddress import ip_address
@@ -33,12 +33,12 @@ class TestClientServerCommunication(unittest.TestCase):
 
         server_root = resource.CoapResource()
         text = TextResource()
-        server_root.putChild('text', text)
+        server_root.put_child('text', text)
         server_endpoint = resource.CoapEndpoint(server_root)
 
         self.server_transport = tsocket.SocketTransport(SERVER_PORT)
         self.server_protocol = core.Coap(self.server_transport)
-        self.server_request_handler = resource.ResoureManager(server_endpoint)
+        self.server_request_handler = resource.ResourceManager(server_endpoint)
         self.server_transport.register_receiver(self.server_protocol)
         self.server_protocol.register_request_handler(self.server_request_handler)
 

@@ -1,7 +1,9 @@
-'''
+"""
 Copyright (c) 2012 Maciej Wasilak <http://sixpinetrees.blogspot.com/>
-              2017 Robert Lubos
-'''
+              2017 Nordic Semiconductor ASA
+
+CoAP option processing.
+"""
 import collections
 import struct
 from itertools import chain
@@ -25,12 +27,12 @@ class Options(object):
             delta = (dllen & 0xF0) >> 4
             length = (dllen & 0x0F)
             rawdata = rawdata[1:]
-            (delta, rawdata) = self.readExtendedFieldValue(delta, rawdata)
-            (length, rawdata) = self.readExtendedFieldValue(length, rawdata)
+            (delta, rawdata) = self.read_extended_field_value(delta, rawdata)
+            (length, rawdata) = self.read_extended_field_value(length, rawdata)
             option_number += delta
             option = option_formats.get(option_number, OpaqueOption)(option_number)
             option.decode(rawdata[:length])
-            self.addOption(option)
+            self.add_option(option)
             rawdata = rawdata[length:]
         return ''
 
@@ -38,10 +40,10 @@ class Options(object):
         """Encode all options in option header into string of bytes."""
         data = []
         current_opt_num = 0
-        option_list = self.optionList()
+        option_list = self.option_list()
         for option in option_list:
-            delta, extended_delta = self.writeExtendedFieldValue(option.number - current_opt_num)
-            length, extended_length = self.writeExtendedFieldValue(option.length)
+            delta, extended_delta = self.write_extended_field_value(option.number - current_opt_num)
+            length, extended_length = self.write_extended_field_value(option.length)
             data.append(chr(((delta & 0x0F) << 4) + (length & 0x0F)))
             data.append(extended_delta)
             data.append(extended_length)
@@ -49,184 +51,184 @@ class Options(object):
             current_opt_num = option.number
         return (''.join(data))
 
-    def addOption(self, option):
+    def add_option(self, option):
         """Add option into option header."""
         self._options.setdefault(option.number, []).append(option)
 
-    def deleteOption(self, number):
+    def delete_option(self, number):
         """Delete option from option header."""
         if number in self._options:
             self._options.pop(number)
 
-    def getOption (self, number):
+    def get_option(self, number):
         """Get option with specified number."""
         return self._options.get(number)
 
-    def optionList(self):
+    def option_list(self):
         return chain.from_iterable(sorted(self._options.values(), key=lambda x: x[0].number))
 
-    def getUriPathAsString(self):
+    def get_uri_path_as_string(self):
         return '/' + '/'.join(self.uri_path)
 
-    def _setUriPath(self, segments):
+    def _set_uri_path(self, segments):
         """Convenience setter: Uri-Path option"""
         if isinstance(segments, basestring): #For Python >3.1 replace with isinstance(segments,str)
             raise ValueError("URI Path should be passed as a list or tuple of segments")
-        self.deleteOption(number=URI_PATH)
+        self.delete_option(number=URI_PATH)
         for segment in segments:
-            self.addOption(StringOption(number=URI_PATH, value=str(segment)))
+            self.add_option(StringOption(number=URI_PATH, value=str(segment)))
 
-    def _getUriPath(self):
+    def _get_uri_path(self):
         """Convenience getter: Uri-Path option"""
         segment_list = []
-        uri_path = self.getOption(number=URI_PATH)
+        uri_path = self.get_option(number=URI_PATH)
         if uri_path is not None:
             for segment in uri_path:
                 segment_list.append(segment.value)
         return segment_list
 
-    uri_path = property(_getUriPath, _setUriPath)
+    uri_path = property(_get_uri_path, _set_uri_path)
 
-    def _setUriQuery(self, segments):
+    def _set_uri_query(self, segments):
         """Convenience setter: Uri-Query option"""
         if isinstance(segments, basestring): #For Python >3.1 replace with isinstance(segments,str)
             raise ValueError("URI Query should be passed as a list or tuple of segments")
-        self.deleteOption(number=URI_QUERY)
+        self.delete_option(number=URI_QUERY)
         for segment in segments:
-            self.addOption(StringOption(number=URI_QUERY, value=str(segment)))
+            self.add_option(StringOption(number=URI_QUERY, value=str(segment)))
 
-    def _getUriQuery(self):
+    def _get_uri_query(self):
         """Convenience getter: Uri-Query option"""
         segment_list = []
-        uri_query = self.getOption(number=URI_QUERY)
+        uri_query = self.get_option(number=URI_QUERY)
         if uri_query is not None:
             for segment in uri_query:
                 segment_list.append(segment.value)
         return segment_list
 
-    uri_query = property(_getUriQuery, _setUriQuery)
+    uri_query = property(_get_uri_query, _set_uri_query)
 
-    def _setBlock2(self, block_tuple):
+    def _set_block_2(self, block_tuple):
         """Convenience setter: Block2 option"""
-        self.deleteOption(number=BLOCK2)
-        self.addOption(BlockOption(number=BLOCK2, value=block_tuple))
+        self.delete_option(number=BLOCK2)
+        self.add_option(BlockOption(number=BLOCK2, value=block_tuple))
 
-    def _getBlock2(self):
+    def _get_block_2(self):
         """Convenience getter: Block2 option"""
-        block2 = self.getOption(number=BLOCK2)
+        block2 = self.get_option(number=BLOCK2)
         if block2 is not None:
             return block2[0].value
         else:
             return None
 
-    block2 = property(_getBlock2, _setBlock2)
+    block2 = property(_get_block_2, _set_block_2)
 
-    def _setBlock1(self, block_tuple):
+    def _set_block_1(self, block_tuple):
         """Convenience setter: Block1 option"""
-        self.deleteOption(number=BLOCK1)
-        self.addOption(BlockOption(number=BLOCK1, value=block_tuple))
+        self.delete_option(number=BLOCK1)
+        self.add_option(BlockOption(number=BLOCK1, value=block_tuple))
 
-    def _getBlock1(self):
+    def _get_block_1(self):
         """Convenience getter: Block1 option"""
-        block1 = self.getOption(number=BLOCK1)
+        block1 = self.get_option(number=BLOCK1)
         if block1 is not None:
             return block1[0].value
         else:
             return None
 
-    block1 = property(_getBlock1, _setBlock1)
+    block1 = property(_get_block_1, _set_block_1)
 
-    def _setContentFormat(self, content_format):
+    def _set_content_format(self, content_format):
         """Convenience setter: Content-Format option"""
-        self.deleteOption(number=CONTENT_FORMAT)
-        self.addOption(UintOption(number=CONTENT_FORMAT, value=content_format))
+        self.delete_option(number=CONTENT_FORMAT)
+        self.add_option(UintOption(number=CONTENT_FORMAT, value=content_format))
 
-    def _getContentFormat(self):
+    def _get_content_format(self):
         """Convenience getter: Content-Format option"""
-        content_format = self.getOption(number=CONTENT_FORMAT)
+        content_format = self.get_option(number=CONTENT_FORMAT)
         if content_format is not None:
             return content_format[0].value
         else:
             return None
 
-    content_format = property(_getContentFormat, _setContentFormat)
+    content_format = property(_get_content_format, _set_content_format)
 
-    def _setETag(self, etag):
+    def _set_etag(self, etag):
         """Convenience setter: ETag option"""
-        self.deleteOption(number=ETAG)
+        self.delete_option(number=ETAG)
         if etag is not None:
-            self.addOption(OpaqueOption(number=ETAG, value=etag))
+            self.add_option(OpaqueOption(number=ETAG, value=etag))
 
-    def _getETag(self):
+    def _get_etag(self):
         """Convenience getter: ETag option"""
-        etag = self.getOption(number=ETAG)
+        etag = self.get_option(number=ETAG)
         if etag is not None:
             return etag[0].value
         else:
             return None
 
-    etag = property(_getETag, _setETag, None, "Access to a single ETag on the message (as used in responses)")
+    etag = property(_get_etag, _set_etag, None, "Access to a single ETag on the message (as used in responses)")
 
-    def _setETags(self, etags):
-        self.deleteOption(number=ETAG)
+    def _set_etags(self, etags):
+        self.delete_option(number=ETAG)
         for tag in etags:
-            self.addOption(OpaqueOption(number=ETAG, value=tag))
+            self.add_option(OpaqueOption(number=ETAG, value=tag))
 
-    def _getETags(self):
-        etag = self.getOption(number=ETAG)
+    def _get_etags(self):
+        etag = self.get_option(number=ETAG)
         return [] if etag is None else [tag.value for tag in etag]
 
-    etags = property(_getETags, _setETags, None, "Access to a list of ETags on the message (as used in requests)")
+    etags = property(_get_etags, _set_etags, None, "Access to a list of ETags on the message (as used in requests)")
 
-    def _setObserve(self, observe):
-        self.deleteOption(number=OBSERVE)
+    def _set_observe(self, observe):
+        self.delete_option(number=OBSERVE)
         if observe is not None:
-            self.addOption(UintOption(number=OBSERVE, value=observe))
+            self.add_option(UintOption(number=OBSERVE, value=observe))
 
-    def _getObserve(self):
-        observe = self.getOption(number=OBSERVE)
+    def _get_observe(self):
+        observe = self.get_option(number=OBSERVE)
         if observe is not None:
             return observe[0].value
         else:
             return None
 
-    observe = property(_getObserve, _setObserve)
+    observe = property(_get_observe, _set_observe)
 
-    def _setAccept(self, accept):
-        self.deleteOption(number=ACCEPT)
+    def _set_accept(self, accept):
+        self.delete_option(number=ACCEPT)
         if accept is not None:
-            self.addOption(UintOption(number=ACCEPT, value=accept))
+            self.add_option(UintOption(number=ACCEPT, value=accept))
 
-    def _getAccept(self):
-        accept = self.getOption(number=ACCEPT)
+    def _get_accept(self):
+        accept = self.get_option(number=ACCEPT)
         if accept is not None:
             return accept[0].value
         else:
             return None
 
-    accept = property(_getAccept, _setAccept)
+    accept = property(_get_accept, _set_accept)
 
-    def _setLocationPath(self, segments):
+    def _set_location_path(self, segments):
         """Convenience setter: Location-Path option"""
         if isinstance(segments, basestring): #For Python >3.1 replace with isinstance(segments,str)
             raise ValueError("Location Path should be passed as a list or tuple of segments")
-        self.deleteOption(number=LOCATION_PATH)
+        self.delete_option(number=LOCATION_PATH)
         for segment in segments:
-            self.addOption(StringOption(number=LOCATION_PATH, value=str(segment)))
+            self.add_option(StringOption(number=LOCATION_PATH, value=str(segment)))
 
-    def _getLocationPath(self):
+    def _get_location_path(self):
         """Convenience getter: Location-Path option"""
         segment_list = []
-        location_path = self.getOption(number=LOCATION_PATH)
+        location_path = self.get_option(number=LOCATION_PATH)
         if location_path is not None:
             for segment in location_path:
                 segment_list.append(segment.value)
         return segment_list
 
-    location_path = property(_getLocationPath, _setLocationPath)
+    location_path = property(_get_location_path, _set_location_path)
 
     @staticmethod
-    def readExtendedFieldValue(value, rawdata):
+    def read_extended_field_value(value, rawdata):
         """Used to decode large values of option delta and option length
         from raw binary form."""
         if value >= 0 and value < 13:
@@ -239,7 +241,7 @@ class Options(object):
             raise ValueError("Value out of range.")
 
     @staticmethod
-    def writeExtendedFieldValue(value):
+    def write_extended_field_value(value):
         """Used to encode large values of option delta and option length
         into raw binary form.
         In CoAP option delta and length can be represented by a variable

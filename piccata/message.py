@@ -1,12 +1,14 @@
-'''
+"""
 Copyright (c) 2012 Maciej Wasilak <http://sixpinetrees.blogspot.com/>
-              2017 Robert Lubos
-'''
+              2017 Nordic Semiconductor ASA
+
+CoAP message implementation.
+"""
 import struct
 import option
 import os
 
-from coap.constants import EMPTY, MAX_TRANSMIT_WAIT, ACK, RST, MAX_TOKEN_LENGTH
+from piccata.constants import EMPTY, MAX_TRANSMIT_WAIT, ACK, RST, MAX_TOKEN_LENGTH
     
 class Message(object):
     """A CoAP Message."""

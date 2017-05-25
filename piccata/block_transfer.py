@@ -1,4 +1,11 @@
-import coap
+"""
+Copyright (c) 2012 Maciej Wasilak <http://sixpinetrees.blogspot.com/>
+              2017 Nordic Semiconductor ASA
+
+CoAP block transfer helper functions.
+"""
+
+import piccata
 
 from constants import *
 from message import Message
@@ -33,7 +40,7 @@ def create_block_1_request(data, number, uri_path, mtype=CON, code=PUT, size_exp
         code (int): Code of the request (PUT/POST).
 
     Returns:
-        coap.message.Message: A request contating specific block 1 option and payload.
+        piccata.message.Message: A request contating specific block 1 option and payload.
     """
     data_block, more = extract_block(data, number, size_exp)
 
@@ -46,7 +53,7 @@ def create_block_1_request(data, number, uri_path, mtype=CON, code=PUT, size_exp
     if code not in (PUT, POST):
         raise ValueError("Block 1 request should be PUT or POST")
 
-    request = Message(mtype=mtype, code=code, payload=data_block, token=coap.message.random_token())
+    request = Message(mtype=mtype, code=code, payload=data_block, token=piccata.message.random_token())
     request.opt.uri_path = uri_path
     request.opt.block1 = (number, more, size_exp)
     return request
@@ -55,10 +62,10 @@ def create_block_1_response(request):
     """Generate a block 1 response for a specific request.
 
     Args:
-        request (coap.message.Message): A request received.
+        request (piccata.message.Message): A request received.
 
     Returns:
-        coap.message.Message: A generated response.
+        piccata.message.Message: A generated response.
     """
     raise NotImplemented("Feature is not yet implemented")
 
@@ -71,12 +78,12 @@ def create_block_2_request(number, uri_path, mtype=CON, size_exp=DEFAULT_BLOCK_S
         type (int): Type of the request (CON/NON).
 
     Returns:
-        coap.message.Message: A request contating specific block 2 option.
+        piccata.message.Message: A request contating specific block 2 option.
     """
     if type not in (CON, NON):
         raise ValueError("Block 2 request should be of type CON or NON")
 
-    request = Message(mtype=mtype, code=GET, token=coap.message.random_token())
+    request = Message(mtype=mtype, code=GET, token=piccata.message.random_token())
     request.opt.uri_path = uri_path
     request.opt.block2 = (number, False, size_exp)
     return request
@@ -85,10 +92,10 @@ def create_block_2_response(data, request):
     """Generate a block 2 response for a specific request.
 
     Args:
-        request (coap.message.Message): A request received.
+        request (piccata.message.Message): A request received.
 
     Returns:
-        coap.message.Message: A response generated.
+        piccata.message.Message: A response generated.
     """
     data_block, more = extract_block(data, request.opt.block2.num, request.opt.block2.szx)
 

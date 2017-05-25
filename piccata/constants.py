@@ -1,4 +1,9 @@
-# TODO Add some some header information.
+"""
+Copyright (c) 2012 Maciej Wasilak <http://sixpinetrees.blogspot.com/>
+              2017 Nordic Semiconductor ASA
+
+CoAP protocol constants.
+"""
 
 COAP_PORT = 5683
 """The IANA-assigned standard port for COAP services."""

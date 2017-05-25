@@ -1,10 +1,10 @@
 import unittest
 import time
 
-from coap import core
-from coap import message
-from coap import resource
-from coap.constants import *
+from piccata import core
+from piccata import message
+from piccata import resource
+from piccata.constants import *
 from transport import tester
 
 from ipaddress import ip_address
@@ -40,12 +40,12 @@ class TestCoap(unittest.TestCase):
     def setUp(self):
         root = resource.CoapResource()
         self.test_resource = TestResource()
-        root.putChild('test', self.test_resource)
+        root.put_child('test', self.test_resource)
         endpoint = resource.CoapEndpoint(root)
 
         self.transport = tester.TesterTransport()
         self.protocol = core.Coap(self.transport)
-        self.request_handler = resource.ResoureManager(endpoint)
+        self.request_handler = resource.ResourceManager(endpoint)
 
         self.transport.register_receiver(self.protocol)
         self.protocol.register_request_handler(self.request_handler)
