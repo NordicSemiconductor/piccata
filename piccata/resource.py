@@ -52,7 +52,7 @@ class CoapResource(object):
             rended_GET(request)
 
         Args:
-            request (coap.message.Message) A request for handling.
+            request (piccata.message.Message) A request for handling.
         """
         if request.code not in requests:
             raise UnsupportedMethod()
@@ -107,7 +107,7 @@ class CoapEndpoint(object):
         """Initialize CoAP endpoint.
 
         Args:
-            root_resource (coap.resource.CoapResource) Root resource of the resource tree.
+            root_resource (piccata.resource.CoapResource) Root resource of the resource tree.
         """
         self.root = root_resource
 
@@ -118,7 +118,7 @@ class CoapEndpoint(object):
         it finds for a path element, stopping when it hits an element where is_leaf is true.
 
         Args:
-            request (coap.message.Message) A request containing the Uri path to search for.
+            request (piccata.message.Message) A request containing the Uri path to search for.
         """
         resource = self.root
         postpath = request.opt.uri_path
@@ -135,7 +135,7 @@ class ResourceManager(object):
         """Initialize the resource manager.
 
         Args:
-            endpoint (coap.resource.coapEndpoint): An endpoint containing the resource tree.
+            endpoint (piccata.resource.coapEndpoint): An endpoint containing the resource tree.
         """
         self.endpoint = endpoint
 
@@ -145,7 +145,7 @@ class ResourceManager(object):
         This function will be called by the CoAP object after registration of ResourceManager object.
 
         Args:
-            request (coap.message.Message): Request received.
+            request (piccata.message.Message): Request received.
 
         Returns:
             A response to send back. None if no response shall be sent.

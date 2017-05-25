@@ -35,7 +35,7 @@ class TransportBase:
 
         Args:
             data (bytes): A data to send.
-            dest (coap.types.Endpoint): A tuple of destination IP address an UDP port.
+            dest (piccata.types.Endpoint): A tuple of destination IP address an UDP port.
         """
         pass
 
@@ -66,8 +66,8 @@ class TransportBase:
 
         Args:
             type (bytes): A data received through the transport.
-            remote (coap.types.Endpoint): A tuple of source IP address an UDP port.
-            local (coap.types.Endpoint): A tuple of destination IP address an UDP port.
+            remote (piccata.types.Endpoint): A tuple of source IP address an UDP port.
+            local (piccata.types.Endpoint): A tuple of destination IP address an UDP port.
         """
         for rcvr in self._receivers:
             rcvr.receive(data, remote, local)
