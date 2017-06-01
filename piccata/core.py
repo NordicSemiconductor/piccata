@@ -276,11 +276,13 @@ class _CoapTransactionLayer(object):
             response (piccata.message.Message): A response received to the respective request. May be None if no response was received.
         """
         try:
-            request, callback, timer = self._outgoing_requests.pop((token, remote))
+            request, callback, timer = self._outgoing_requests((token, remote))
         except KeyError:
             logging.info("Transaction not found.")
         else:
-            timer.cancel()
+            if (not remote.addr.is_multicast):
+                del self._outgoing_requests[(token, remote)]
+                timer.cancel()
             self._handle_app_callback(callback, result, request, response)
 
     def _timeout_transaction(self, request):
