@@ -276,7 +276,7 @@ class _CoapTransactionLayer(object):
             response (piccata.message.Message): A response received to the respective request. May be None if no response was received.
         """
         try:
-            request, callback, timer = self._outgoing_requests((token, remote))
+            request, callback, timer = self._outgoing_requests[(token, remote)]
         except KeyError:
             logging.info("Transaction not found.")
         else:
@@ -332,10 +332,16 @@ class _CoapTransactionLayer(object):
                 self._message_layer.send_message(ack)
 
         logging.info("Received Response, token: %s, host: %s, port: %s" % (response.token.encode('hex'), response.remote[0], response.remote[1]))
-        if (response.token, response.remote) in self._outgoing_requests:
-            self._finish_transaction(response.token, response.remote, RESULT_SUCCESS, response)
-            _ack_if_confirmable()
-        else:
+
+        found = False
+        for token, remote in self._outgoing_requests.keys():
+            if (token == response.token) and (remote == response.remote or remote.is_multicast):
+                found = True
+                self._finish_transaction(response.token, response.remote, RESULT_SUCCESS, response)
+                _ack_if_confirmable()
+                break
+
+        if not found:
             _reset_unrecognized()
 
     def _process_empty(self, message):
