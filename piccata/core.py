@@ -335,9 +335,9 @@ class _CoapTransactionLayer(object):
 
         found = False
         for token, remote in self._outgoing_requests.keys():
-            if (token == response.token) and (remote == response.remote or remote.is_multicast):
+            if (token == response.token) and (remote == response.remote or remote.addr.is_multicast):
                 found = True
-                self._finish_transaction(response.token, response.remote, RESULT_SUCCESS, response)
+                self._finish_transaction(response.token, remote, RESULT_SUCCESS, response)
                 _ack_if_confirmable()
                 break
 
