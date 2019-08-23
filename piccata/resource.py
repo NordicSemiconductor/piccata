@@ -5,10 +5,10 @@ Copyright (c) 2012 Maciej Wasilak <http://sixpinetrees.blogspot.com/>
 Implementation of the lowest-level Resource class.
 """
 
-import message
-from constants import *
+from piccata import message
+from piccata.constants import *
 from itertools import chain
-from types import NoResource, UnallowedMethod, UnsupportedMethod
+from piccata.types import NoResource, UnallowedMethod, UnsupportedMethod
 
 class CoapResource(object):
     """CoAP-accessible resource."""
@@ -156,10 +156,10 @@ class ResourceManager(object):
             resource = self.endpoint.get_resource_for(request)
             response = resource.render(request)
         except NoResource:
-            response = message.Message.AckMessage(request, code=NOT_FOUND, payload="Error: Resource not found!")
+            response = message.Message.AckMessage(request, code=NOT_FOUND, payload=b"Error: Resource not found!")
         except UnallowedMethod:
-            response = message.Message.AckMessage(request, code=METHOD_NOT_ALLOWED, payload="Error: Method not allowed!")
+            response = message.Message.AckMessage(request, code=METHOD_NOT_ALLOWED, payload=b"Error: Method not allowed!")
         except UnsupportedMethod:
-            response = message.Message.AckMessage(request, code=METHOD_NOT_ALLOWED, payload="Error: Method not recognized!")
+            response = message.Message.AckMessage(request, code=METHOD_NOT_ALLOWED, payload=b"Error: Method not recognized!")
 
         return response

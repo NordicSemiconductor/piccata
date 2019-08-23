@@ -9,7 +9,7 @@ import struct
 from itertools import chain
 from abc import ABCMeta, abstractmethod
 
-from constants import *
+from piccata.constants import *
 
 class Options(object):
     """Represent CoAP Header Options."""
@@ -21,9 +21,9 @@ class Options(object):
         """Decode all options in message from raw binary data."""
         option_number = 0
         while len(rawdata) > 0:
-            if ord(rawdata[0]) == 0xFF:
+            if rawdata[0] == 0xFF:
                 return rawdata[1:]
-            dllen = ord(rawdata[0])
+            dllen = rawdata[0]
             delta = (dllen & 0xF0) >> 4
             length = (dllen & 0x0F)
             rawdata = rawdata[1:]
@@ -34,7 +34,7 @@ class Options(object):
             option.decode(rawdata[:length])
             self.add_option(option)
             rawdata = rawdata[length:]
-        return ''
+        return b''
 
     def encode(self):
         """Encode all options in option header into string of bytes."""
@@ -44,12 +44,12 @@ class Options(object):
         for option in option_list:
             delta, extended_delta = self.write_extended_field_value(option.number - current_opt_num)
             length, extended_length = self.write_extended_field_value(option.length)
-            data.append(chr(((delta & 0x0F) << 4) + (length & 0x0F)))
+            data.append(bytes([((delta & 0x0F) << 4) + (length & 0x0F)]))
             data.append(extended_delta)
             data.append(extended_length)
             data.append(option.encode())
             current_opt_num = option.number
-        return (''.join(data))
+        return (b''.join(data))
 
     def add_option(self, option):
         """Add option into option header."""
@@ -72,11 +72,11 @@ class Options(object):
 
     def _set_uri_path(self, segments):
         """Convenience setter: Uri-Path option"""
-        if isinstance(segments, basestring): #For Python >3.1 replace with isinstance(segments,str)
+        if isinstance(segments, str):
             raise ValueError("URI Path should be passed as a list or tuple of segments")
         self.delete_option(number=URI_PATH)
         for segment in segments:
-            self.add_option(StringOption(number=URI_PATH, value=str(segment)))
+            self.add_option(StringOption(number=URI_PATH, value=segment))
 
     def _get_uri_path(self):
         """Convenience getter: Uri-Path option"""
@@ -91,7 +91,7 @@ class Options(object):
 
     def _set_uri_query(self, segments):
         """Convenience setter: Uri-Query option"""
-        if isinstance(segments, basestring): #For Python >3.1 replace with isinstance(segments,str)
+        if isinstance(segments, str):
             raise ValueError("URI Query should be passed as a list or tuple of segments")
         self.delete_option(number=URI_QUERY)
         for segment in segments:
@@ -234,7 +234,7 @@ class Options(object):
         if value >= 0 and value < 13:
             return (value, rawdata)
         elif value == 13:
-            return (ord(rawdata[0]) + 13, rawdata[1:])
+            return (rawdata[0] + 13, rawdata[1:])
         elif value == 14:
             return (struct.unpack('!H', rawdata[:2])[0] + 269, rawdata[2:])
         else:
@@ -247,7 +247,7 @@ class Options(object):
         In CoAP option delta and length can be represented by a variable
         number of bytes depending on the value."""
         if value >= 0 and value < 13:
-            return (value, '')
+            return (value, b'')
         elif value >= 13 and value < 269:
             return (13, struct.pack('!B', value - 13))
         elif value >= 269 and value < 65804:
@@ -320,7 +320,7 @@ class UintOption(Option):
 
     def encode(self):
         rawdata = struct.pack("!L", self.value)  # For Python >3.1 replace with int.to_bytes()
-        return rawdata.lstrip(chr(0))
+        return rawdata.lstrip(bytes([0]))
 
     def decode(self, rawdata):  # For Python >3.1 replace with int.from_bytes()
         value = 0

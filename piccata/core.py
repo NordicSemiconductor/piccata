@@ -12,9 +12,9 @@ import sys
 from threading import Timer
 from ipaddress import ip_address
 
-from constants import *
-from message import Message
-from types import Endpoint
+from piccata.constants import *
+from piccata.message import Message
+from piccata.types import Endpoint
 
 
 class _CoapMessageLayer(object):
@@ -350,7 +350,7 @@ class _CoapTransactionLayer(object):
                 ack = Message.EmptyAckMessage(response)
                 self._message_layer.send_message(ack)
 
-        logging.info("Received Response, token: %s, host: %s, port: %s" % (response.token.encode('hex'), response.remote[0], response.remote[1]))
+        logging.info("Received Response, token: %s, host: %s, port: %s" % (response.token.hex(), response.remote[0], response.remote[1]))
 
         found = False
         for token, remote in self._outgoing_requests.keys():
@@ -457,7 +457,7 @@ class _CoapTransactionLayer(object):
             if response_callback != None:
                 callback = (response_callback, response_callback_args, response_callback_kw)
                 self._add_transaction(request, callback)
-            logging.info("Sending request - Token: %s, Host: %s, Port: %s" % (request.token.encode('hex'), str(request.remote[0]), request.remote[1]))
+            logging.info("Sending request - Token: %s, Host: %s, Port: %s" % (request.token.hex(), str(request.remote[0]), request.remote[1]))
 
     def send_response(self, request, response):
         """Send a response.
@@ -472,7 +472,7 @@ class _CoapTransactionLayer(object):
             raise ValueError("Message code is not valid for a response.")
 
         response.token = request.token
-        logging.info("Token: %s" % ":".join("{:02x}".format(ord(c)) for c in response.token))
+        logging.info("Token: %s" % ":".join("{:02x}".format(c) for c in response.token))
         response.remote = request.remote
 
         if response.mtype is None:

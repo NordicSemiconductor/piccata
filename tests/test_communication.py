@@ -12,7 +12,7 @@ import time
 
 SERVER_PORT = 5683
 
-PAYLOAD = "123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 "
+PAYLOAD = b"123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 "
 
 class TextResource(resource.CoapResource):
 
@@ -33,7 +33,7 @@ class TestClientServerCommunication(unittest.TestCase):
 
         server_root = resource.CoapResource()
         text = TextResource()
-        server_root.put_child('text', text)
+        server_root.put_child(b'text', text)
         server_endpoint = resource.CoapEndpoint(server_root)
 
         self.server_transport = tsocket.SocketTransport(SERVER_PORT)
@@ -64,10 +64,10 @@ class TestClientServerCommunication(unittest.TestCase):
 
     def test_client_server_communication(self):
         request = message.Message(mtype = CON, code=GET)
-        request.opt.uri_path = ("text", )
+        request.opt.uri_path = (b"text", )
         request.remote = (ip_address(u"127.0.0.1"), SERVER_PORT)
         request.timeout = ACK_TIMEOUT
-        request.payload = ""
+        request.payload = b""
         req = self.client_protocol.request(request, self._handle_text_response)
 
         counter = 0
