@@ -28,8 +28,8 @@ class ListenerThread(Thread):
         while not self._terminate:
             try:
                 data, addr = self._sock.recvfrom(MTU)
-                addr = (ip_address(unicode(addr[0])), addr[1])
-            except socket.error, e:
+                addr = (ip_address(addr[0]), addr[1])
+            except socket.error as e:
                 err = e.args[0]
                 if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
                     # If no data is available, one of the following will be raised.
@@ -37,7 +37,7 @@ class ListenerThread(Thread):
                     continue
                 else:
                     # Other exception raised
-                    print e
+                    print(e)
                     break
             else:
                 if len(data) == 0:
@@ -45,7 +45,7 @@ class ListenerThread(Thread):
                     break
                 else:
                     own_addr = self._sock.getsockname()
-                    own_addr = (ip_address(unicode(own_addr[0])), own_addr[1])
+                    own_addr = (ip_address(own_addr[0]), own_addr[1])
                     self._receive_callback(data, addr, own_addr)
 
     def stop(self):

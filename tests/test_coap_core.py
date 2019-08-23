@@ -10,8 +10,8 @@ from transport import tester
 from ipaddress import ip_address
 import sys
 
-TEST_PAYLOAD = "testPayload"
-TEST_TOKEN = "abcd"
+TEST_PAYLOAD = b"testPayload"
+TEST_TOKEN = b"abcd"
 TEST_MID = 1000
 
 TEST_ADDRESS = ip_address(u"12.34.56.78")
@@ -40,7 +40,7 @@ class TestCoap(unittest.TestCase):
     def setUp(self):
         root = resource.CoapResource()
         self.test_resource = TestResource()
-        root.put_child('test', self.test_resource)
+        root.put_child(b'test', self.test_resource)
         endpoint = resource.CoapEndpoint(root)
 
         self.transport = tester.TesterTransport()
@@ -143,11 +143,11 @@ class TestCoapSendResponsePath(TestCoap):
 
     def test_coap_core_shall_return_error_when_non_response_message_is_sent_as_response(self):
 
-        self.rsp = message.Message(ACK, TEST_MID, GET, "", TEST_TOKEN)
+        self.rsp = message.Message(ACK, TEST_MID, GET, b"", TEST_TOKEN)
 
         # Prepare fake request to trigger response sending.
-        req = message.Message(CON, TEST_MID, GET, "", TEST_TOKEN)
-        req.opt.uri_path = ("test", )
+        req = message.Message(CON, TEST_MID, GET, b"", TEST_TOKEN)
+        req.opt.uri_path = (b"test", )
         raw = req.encode()
 
         # Check that error is raised on incorrect response type
@@ -155,11 +155,11 @@ class TestCoapSendResponsePath(TestCoap):
 
     def test_coap_core_shall_queue_CON_response_on_retransmission_list(self):
 
-        self.rsp = message.Message(CON, TEST_MID + 1, CONTENT, "", TEST_TOKEN)
+        self.rsp = message.Message(CON, TEST_MID + 1, CONTENT, b"", TEST_TOKEN)
 
         # Prepare fake request to trigger response sending.
-        req = message.Message(NON, TEST_MID, GET, "", TEST_TOKEN)
-        req.opt.uri_path = ("test", )
+        req = message.Message(NON, TEST_MID, GET, b"", TEST_TOKEN)
+        req.opt.uri_path = (b"test", )
         raw = req.encode()
 
         # Simulate fake request reception
@@ -170,11 +170,11 @@ class TestCoapSendResponsePath(TestCoap):
 
     def test_coap_core_shall_not_queue_NON_response_on_retransmission_list(self):
 
-        self.rsp = message.Message(NON, TEST_MID + 1, CONTENT, "", TEST_TOKEN)
+        self.rsp = message.Message(NON, TEST_MID + 1, CONTENT, b"", TEST_TOKEN)
 
         # Prepare fake request to trigger response sending.
-        req = message.Message(NON, TEST_MID, GET, "", TEST_TOKEN)
-        req.opt.uri_path = ("test", )
+        req = message.Message(NON, TEST_MID, GET, b"", TEST_TOKEN)
+        req.opt.uri_path = (b"test", )
         raw = req.encode()
 
         # Simulate fake request reception
@@ -185,11 +185,11 @@ class TestCoapSendResponsePath(TestCoap):
 
     def test_coap_core_shall_queue_ACK_and_RST_response_on_responded_list(self):
 
-        self.rsp = message.Message(ACK, TEST_MID, CONTENT, "", TEST_TOKEN)
+        self.rsp = message.Message(ACK, TEST_MID, CONTENT, b"", TEST_TOKEN)
 
         # Prepare fake request to trigger response sending.
-        req = message.Message(NON, TEST_MID, GET, "", TEST_TOKEN)
-        req.opt.uri_path = ("test", )
+        req = message.Message(NON, TEST_MID, GET, b"", TEST_TOKEN)
+        req.opt.uri_path = (b"test", )
         raw = req.encode()
 
         remote = (TEST_ADDRESS, TEST_PORT)
@@ -224,7 +224,7 @@ class TestCoapReceiveRequestPath(TestCoap):
     def check_that_duplicated_request_is_automatically_responded(self):
 
         req = message.Message(CON, TEST_MID, GET, TEST_PAYLOAD, TEST_TOKEN)
-        req.opt.uri_path = ("test", )
+        req.opt.uri_path = (b"test", )
         raw = req.encode()
         remote = (TEST_ADDRESS, TEST_PORT)
 
@@ -263,7 +263,7 @@ class TestCoapReceiveRequestPath(TestCoap):
 
         # No resopnse is sent.
         req = message.Message(CON, TEST_MID, GET, TEST_PAYLOAD, TEST_TOKEN)
-        req.opt.uri_path = ("test", )
+        req.opt.uri_path = (b"test", )
         raw = req.encode()
         remote = (TEST_ADDRESS, TEST_PORT)
 
@@ -286,7 +286,7 @@ class TestCoapReceiveRequestPath(TestCoap):
         self.rsp = message.Message(NON, TEST_MID, CONTENT, TEST_PAYLOAD, TEST_TOKEN)
 
         req = message.Message(NON, TEST_MID, GET, TEST_PAYLOAD, TEST_TOKEN)
-        req.opt.uri_path = ("test", )
+        req.opt.uri_path = (b"test", )
         raw = req.encode()
         remote = (TEST_ADDRESS, TEST_PORT)
 
@@ -309,7 +309,7 @@ class TestCoapReceiveRequestPath(TestCoap):
 class TestCoapReceiveResponsePath(TestCoap):
 
     def send_initial_request(self, remote, timeout = None):
-        self.req = message.Message(CON, TEST_MID, GET, "", TEST_TOKEN)
+        self.req = message.Message(CON, TEST_MID, GET, b"", TEST_TOKEN)
         self.req.remote = remote
         if timeout != None:
             self.req.timeout = timeout
@@ -321,12 +321,12 @@ class TestCoapReceiveResponsePath(TestCoap):
         self.transport._receive(raw, remote, (TEST_LOCAL_ADDRESS, TEST_LOCAL_PORT))
 
     def receive_empty_ack_response(self, remote):
-        rsp = message.Message(ACK, TEST_MID, EMPTY, "", "")
+        rsp = message.Message(ACK, TEST_MID, EMPTY)
         raw = rsp.encode()
         self.transport._receive(raw, remote, (TEST_LOCAL_ADDRESS, TEST_LOCAL_PORT))
 
     def receive_rst_response(self, remote):
-        rsp = message.Message(RST, TEST_MID, EMPTY, "", "")
+        rsp = message.Message(RST, TEST_MID, EMPTY)
         raw = rsp.encode()
         self.transport._receive(raw, remote, (TEST_LOCAL_ADDRESS, TEST_LOCAL_PORT))
 
@@ -406,7 +406,7 @@ class TestCoapReceiveResponsePath(TestCoap):
     def test_coap_core_shall_resend_ACK_on_duplicated_CON_response(self):
         # Send initial request.
         remote = (TEST_ADDRESS, TEST_PORT)
-        raw_empty_ack = message.Message(ACK, TEST_MID + 1, EMPTY, "", "").encode()
+        raw_empty_ack = message.Message(ACK, TEST_MID + 1, EMPTY).encode()
         self.send_initial_request(remote)
         self.assertEqual(self.transport.output_count, 1)
 

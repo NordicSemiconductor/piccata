@@ -5,7 +5,7 @@ Copyright (c) 2012 Maciej Wasilak <http://sixpinetrees.blogspot.com/>
 CoAP message implementation.
 """
 import struct
-import option
+from piccata import option
 import os
 
 from piccata.constants import EMPTY, MAX_TRANSMIT_WAIT, ACK, RST, MAX_TOKEN_LENGTH
@@ -13,7 +13,7 @@ from piccata.constants import EMPTY, MAX_TRANSMIT_WAIT, ACK, RST, MAX_TOKEN_LENG
 class Message(object):
     """A CoAP Message."""
 
-    def __init__(self, mtype=None, mid=None, code=EMPTY, payload='', token=''):
+    def __init__(self, mtype=None, mid=None, code=EMPTY, payload=b'', token=b''):
 
         if payload is None:
             raise TypeError("Payload must not be None. Use empty string instead.")
@@ -48,12 +48,12 @@ class Message(object):
         """Create binary representation of message from Message object."""
         if self.mtype is None or self.mid is None:
             raise TypeError("Fatal Error: Message Type and Message ID must not be None.")
-        rawdata = chr((self.version << 6) + ((self.mtype & 0x03) << 4) + (len(self.token) & 0x0F))
+        rawdata = bytes([(self.version << 6) + ((self.mtype & 0x03) << 4) + (len(self.token) & 0x0F)])
         rawdata += struct.pack('!BH', self.code, self.mid)
         rawdata += self.token
         rawdata += self.opt.encode()
         if len(self.payload) > 0:
-            rawdata += chr(0xFF)
+            rawdata += bytes([0xFF])
             rawdata += self.payload
         return rawdata
 
@@ -68,12 +68,12 @@ class Message(object):
     
     @classmethod
     def _empty_message(cls, request, mtype):
-        response = cls(mtype=mtype, mid=request.mid, code=EMPTY, payload='', token='')
+        response = cls(mtype=mtype, mid=request.mid, code=EMPTY)
         response.remote = request.remote
         return response
 
     @classmethod
-    def AckMessage(cls, request, code, payload = ''):
+    def AckMessage(cls, request, code, payload=b''):
         ack = cls(mtype=ACK, mid=request.mid, code=code, payload=payload, token=request.token)
         ack.remote = request.remote
         return ack

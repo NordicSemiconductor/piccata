@@ -7,8 +7,8 @@ CoAP block transfer helper functions.
 
 import piccata
 
-from constants import *
-from message import Message
+from piccata.constants import *
+from piccata.message import Message
 
 def extract_block(data, number, size_exp):
     size = size_exp_to_size(size_exp)
