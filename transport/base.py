@@ -4,11 +4,9 @@ Copyright (c) 2017 Nordic Semiconductor ASA
 An abstract base class for specific transport classes.
 """
 
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 
-class TransportBase:
-    __metaclass__ = ABCMeta
-
+class TransportBase(ABC):
     @abstractmethod
     def __init__(self, port):
         """Initializes transport.
@@ -71,4 +69,3 @@ class TransportBase:
         """
         for rcvr in self._receivers:
             rcvr.receive(data, remote, local)
-
