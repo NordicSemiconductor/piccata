@@ -137,11 +137,13 @@ class TestOptions(unittest.TestCase):
         opt1.uri_path = ["core"]
         self.assertEqual(len(opt1.get_option(constants.URI_PATH)), 1, 'wrong uri_path setter operation for single string argument')
         self.assertEqual(opt1.get_option(constants.URI_PATH)[0].value, "core", 'wrong uri_path setter operation for single string argument')
+        self.assertEqual(opt1.get_uri_path_as_string(), '/core')
         opt2 = option.Options()
         opt2.uri_path = ("core",".well-known")
         self.assertEqual(len(opt2.get_option(constants.URI_PATH)), 2, 'wrong uri_path setter operation for 2-element tuple argument')
         self.assertEqual(opt2.get_option(constants.URI_PATH)[0].value, "core", 'wrong uri_path setter operation for 2-element tuple argument')
         self.assertEqual(opt2.get_option(constants.URI_PATH)[1].value, ".well-known", 'wrong uri_path setter operation for 2-element tuple argument')
+        self.assertEqual(opt2.get_uri_path_as_string(), '/core/.well-known')
         opt3 = option.Options()
         self.assertRaises(ValueError, setattr, opt3, "uri_path", "core")
 
