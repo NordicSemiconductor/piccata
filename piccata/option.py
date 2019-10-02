@@ -7,7 +7,7 @@ CoAP option processing.
 import collections
 import struct
 from itertools import chain
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 
 from piccata.constants import *
 
@@ -256,9 +256,7 @@ class Options(object):
             raise ValueError("Value out of range.")
 
 
-class Option:
-    __metaclass__ = ABCMeta
-
+class Option(ABC):
     @abstractmethod
     def encode(self):
         pass
