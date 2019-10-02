@@ -72,7 +72,7 @@ class Options(object):
 
     def _set_uri_path(self, segments):
         """Convenience setter: Uri-Path option"""
-        if isinstance(segments, str):
+        if isinstance(segments, (str, bytes)):
             raise ValueError("URI Path should be passed as a list or tuple of segments")
         self.delete_option(number=URI_PATH)
         for segment in segments:
@@ -91,11 +91,11 @@ class Options(object):
 
     def _set_uri_query(self, segments):
         """Convenience setter: Uri-Query option"""
-        if isinstance(segments, str):
+        if isinstance(segments, (str, bytes)):
             raise ValueError("URI Query should be passed as a list or tuple of segments")
         self.delete_option(number=URI_QUERY)
         for segment in segments:
-            self.add_option(StringOption(number=URI_QUERY, value=str(segment)))
+            self.add_option(StringOption(number=URI_QUERY, value=segment))
 
     def _get_uri_query(self):
         """Convenience getter: Uri-Query option"""
@@ -210,11 +210,11 @@ class Options(object):
 
     def _set_location_path(self, segments):
         """Convenience setter: Location-Path option"""
-        if isinstance(segments, basestring): #For Python >3.1 replace with isinstance(segments,str)
+        if isinstance(segments, (str, bytes)):
             raise ValueError("Location Path should be passed as a list or tuple of segments")
         self.delete_option(number=LOCATION_PATH)
         for segment in segments:
-            self.add_option(StringOption(number=LOCATION_PATH, value=str(segment)))
+            self.add_option(StringOption(number=LOCATION_PATH, value=segment))
 
     def _get_location_path(self):
         """Convenience getter: Location-Path option"""
