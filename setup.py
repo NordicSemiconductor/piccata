@@ -8,5 +8,4 @@ setup(name='piccata',
       author='Nordic Semiconductor',
       url='https://github.com/NordicSemiconductor/piccata',
       packages=find_packages(exclude=["*.test", "*.test.*"]),
-      install_requires = ['ipaddress'],
      )
