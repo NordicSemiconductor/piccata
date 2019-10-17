@@ -42,8 +42,8 @@ class Options(object):
         current_opt_num = 0
         option_list = self.option_list()
         for option in option_list:
-            delta, extended_delta = self.write_extended_field_value(option.number - current_opt_num)
-            length, extended_length = self.write_extended_field_value(option.length)
+            delta, extended_delta = self.write_extended_field_value(int(option.number - current_opt_num))
+            length, extended_length = self.write_extended_field_value(int(option.length))
             data.append(bytes([((delta & 0x0F) << 4) + (length & 0x0F)]))
             data.append(extended_delta)
             data.append(extended_length)
@@ -323,7 +323,7 @@ class UintOption(Option):
     def decode(self, rawdata):  # For Python >3.1 replace with int.from_bytes()
         value = 0
         for byte in rawdata:
-            value = (value * 256) + ord(byte)
+            value = (value * 256) + byte
         self.value = value
         return self
 
@@ -348,12 +348,12 @@ class BlockOption(Option):
     def encode(self):
         as_integer = (self.value[0] << 4) + (self.value[1] * 0x08) + self.value[2]
         rawdata = struct.pack("!L", as_integer)  # For Python >3.1 replace with int.to_bytes()
-        return rawdata.lstrip(chr(0))
+        return rawdata.lstrip(bytes([0]))
 
     def decode(self, rawdata):
         as_integer = 0
         for byte in rawdata:
-            as_integer = (as_integer * 256) + ord(byte)
+            as_integer = (as_integer * 256) + byte
         self.value = self.BlockwiseTuple(num=(as_integer >> 4), m=bool(as_integer & 0x08), szx=(as_integer & 0x07))
 
     def _length(self):
