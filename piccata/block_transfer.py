@@ -36,7 +36,7 @@ def create_block_1_request(data, number, uri_path, mtype=CON, code=PUT, size_exp
     Args:
         number (int): Block number to send.
         uri_path (tuple): A tuple containing strings representing target resource URI path.
-        type (int): Type of the request (CON/NON).
+        mtype (int): Type of the request (CON/NON).
         code (int): Code of the request (PUT/POST).
 
     Returns:
@@ -47,7 +47,7 @@ def create_block_1_request(data, number, uri_path, mtype=CON, code=PUT, size_exp
     if data_block == None:
         raise ValueError("Block 1 request number out of bound.")
 
-    if type not in (CON, NON):
+    if mtype not in (CON, NON):
         raise ValueError("Block 1 request should be of type CON or NON")
 
     if code not in (PUT, POST):
@@ -75,12 +75,12 @@ def create_block_2_request(number, uri_path, mtype=CON, size_exp=DEFAULT_BLOCK_S
     Args:
         uri_path (tuple): A tuple containing strings representing target resource URI path.
         number (int): Requested block number.
-        type (int): Type of the request (CON/NON).
+        mtype (int): Type of the request (CON/NON).
 
     Returns:
         piccata.message.Message: A request contating specific block 2 option.
     """
-    if type not in (CON, NON):
+    if mtype not in (CON, NON):
         raise ValueError("Block 2 request should be of type CON or NON")
 
     request = Message(mtype=mtype, code=GET, token=piccata.message.random_token())
