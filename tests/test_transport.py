@@ -101,8 +101,8 @@ class TestSocketTransport(unittest.TestCase):
         self.assertEqual(self.server._listener_thread, None)
 
     def test_socket_transport_data_from_client_shall_reach_server(self):
-        test_request = "test request"
-        test_response = "test response"
+        test_request = b"test request"
+        test_response = b"test response"
 
         self.client.send(test_request, ("127.0.0.1", self.TEST_PORT))
 
