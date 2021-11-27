@@ -1,7 +1,7 @@
 piccata - Python CoAp Toolkit
 =============================
 
-piccata is a simple CoAP (RFC7252) toolkit compatible with Python 2.7. 
+piccata is a simple CoAP (RFC7252) toolkit written in Python.
 
 The toolkit provides basic building blocks for using CoAP in an
 application. piccata handles messaging between endpoints 
