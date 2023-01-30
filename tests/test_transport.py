@@ -20,6 +20,8 @@ class TestUtils:
 
 class TestReceiver:
 
+    __test__ = False
+
     def __init__(self, name):
         self.counter = 0
         self.name = name
