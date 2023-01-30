@@ -22,6 +22,8 @@ TEST_LOCAL_PORT = 20000
 
 class TestResource(resource.CoapResource):
 
+    __test__ = False
+
     def __init__(self):
         resource.CoapResource.__init__(self)
         self.resource_handler = None

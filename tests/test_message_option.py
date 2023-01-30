@@ -91,13 +91,13 @@ class TestUintOption(unittest.TestCase):
 
     def test_decode(self):
         arguments = ("",
-                     chr(1),
-                     chr(2),
-                     chr(40),
-                     chr(50),
-                     chr(255),
-                     chr(1)+chr(0),
-                     chr(3)+chr(232))
+                     bytes([1]),
+                     bytes([2]),
+                     bytes([40]),
+                     bytes([50]),
+                     bytes([255]),
+                     bytes([1])+bytes([0]),
+                     bytes([3])+bytes([232]))
         results =   (0,
                      1,
                      2,
