@@ -7,5 +7,5 @@ setup(name='piccata',
       description='Python CoAP Toolkit',
       author='Nordic Semiconductor',
       url='https://github.com/NordicSemiconductor/piccata',
-      packages=find_packages(),
+      packages=find_packages(exclude=["tests"])
      )
