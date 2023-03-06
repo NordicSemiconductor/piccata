@@ -6,6 +6,7 @@ CoAP transport implmentation based on sockets.
 import socket
 import time
 import errno
+import collections
 
 from threading import Thread
 from ipaddress import ip_address
@@ -25,10 +26,11 @@ class ListenerThread(Thread):
         self._terminate = False
 
     def run(self):
+        endpoint = collections.namedtuple('endpoint', 'addr port')
         while not self._terminate:
             try:
                 data, addr = self._sock.recvfrom(MTU)
-                addr = (ip_address(addr[0]), addr[1])
+                addr = endpoint(ip_address(addr[0]), addr[1])
             except socket.error as e:
                 err = e.args[0]
                 if err == errno.EAGAIN or err == errno.EWOULDBLOCK:
@@ -45,7 +47,7 @@ class ListenerThread(Thread):
                     break
                 else:
                     own_addr = self._sock.getsockname()
-                    own_addr = (ip_address(own_addr[0]), own_addr[1])
+                    own_addr = endpoint(ip_address(own_addr[0]), own_addr[1])
                     self._receive_callback(data, addr, own_addr)
 
     def stop(self):
